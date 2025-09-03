@@ -4462,7 +4462,7 @@ describe.sequential('__typename with data tests', async () => {
 				});
 				selfRelServer = createServer(yoga);
 
-				const selfRelPort = 4003;
+				const selfRelPort = await getPort({ port: 4003 });
 				selfRelServer.listen(selfRelPort);
 
 				const gql = new GraphQLClient(`http://localhost:${selfRelPort}/graphql`);
