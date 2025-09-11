@@ -40,8 +40,9 @@ const generateSelectArray = (
 	relationMap: Record<string, Record<string, TableNamedRelations>>,
 	orderArgs: GraphQLInputObjectType,
 	filterArgs: GraphQLInputObjectType,
+	listSuffix: string,
 ): CreatedResolver => {
-	const queryName = `${uncapitalize(tableName)}`;
+	const queryName = `${uncapitalize(tableName)}${listSuffix}`;
 	const queryBase = db.query[tableName as keyof typeof db.query] as unknown as
 		| RelationalQueryBuilder<any, any, any>
 		| undefined;
@@ -115,8 +116,9 @@ const generateSelectSingle = (
 	relationMap: Record<string, Record<string, TableNamedRelations>>,
 	orderArgs: GraphQLInputObjectType,
 	filterArgs: GraphQLInputObjectType,
+	singleSuffix: string,
 ): CreatedResolver => {
-	const queryName = `${uncapitalize(tableName)}Single`;
+	const queryName = `${uncapitalize(tableName)}${singleSuffix}`;
 	const queryBase = db.query[tableName as keyof typeof db.query] as unknown as
 		| RelationalQueryBuilder<any, any, any>
 		| undefined;
@@ -431,6 +433,7 @@ export const generateSchemaData = <
 	db: TDrizzleInstance,
 	schema: TSchema,
 	relationsDepthLimit: number | undefined,
+	suffixes: { list: string; single: string },
 ): GeneratedEntities<TDrizzleInstance, TSchema> => {
 	const rawSchema = schema;
 	const schemaEntries = Object.entries(rawSchema);
@@ -501,6 +504,7 @@ export const generateSchemaData = <
 			namedRelations,
 			tableOrder,
 			tableFilters,
+			suffixes.list,
 		);
 		const selectSingleGenerated = generateSelectSingle(
 			db,
@@ -509,6 +513,7 @@ export const generateSchemaData = <
 			namedRelations,
 			tableOrder,
 			tableFilters,
+			suffixes.single,
 		);
 		const selectCountGenerated = generateSelectCount(
 			db,
