@@ -1,6 +1,13 @@
 import { is } from 'drizzle-orm';
-import { MySqlInt, MySqlSerial } from 'drizzle-orm/mysql-core';
-import { PgInteger, PgSerial } from 'drizzle-orm/pg-core';
+import {
+	MySqlBigInt53,
+	MySqlInt,
+	MySqlMediumInt,
+	MySqlSerial,
+	MySqlSmallInt,
+	MySqlTinyInt,
+} from 'drizzle-orm/mysql-core';
+import { PgBigInt53, PgInteger, PgSerial, PgSmallInt } from 'drizzle-orm/pg-core';
 import { SQLiteInteger } from 'drizzle-orm/sqlite-core';
 import {
 	GraphQLBoolean,
@@ -81,8 +88,14 @@ const columnToGraphQLCore = (
 			return { type: GraphQLString, description: 'BigInt' };
 		case 'number':
 			return is(column, PgInteger)
+					|| is(column, PgSmallInt)
+					|| is(column, PgBigInt53)
 					|| is(column, PgSerial)
 					|| is(column, MySqlInt)
+					|| is(column, MySqlSmallInt)
+					|| is(column, MySqlTinyInt)
+					|| is(column, MySqlMediumInt)
+					|| is(column, MySqlBigInt53)
 					|| is(column, MySqlSerial)
 					|| is(column, SQLiteInteger)
 				? { type: GraphQLInt, description: 'Integer' }
