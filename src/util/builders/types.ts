@@ -69,7 +69,7 @@ export type GetColumnGqlDataType<TColumn extends Column> = TColumn['dataType'] e
 				x: number;
 				y: number;
 			}>
-		: ColTypeIsNull<TColumn, string>
+		: ColTypeIsNull<TColumn, any>
 	: TColumn['dataType'] extends 'date' | 'string' | 'bigint'
 		? TColumn['enumValues'] extends [string, ...string[]] ? ColTypeIsNull<TColumn, TColumn['enumValues'][number]>
 		: ColTypeIsNull<TColumn, string>
@@ -95,7 +95,7 @@ export type GetColumnGqlInsertDataType<TColumn extends Column> = TColumn['dataTy
 				x: number;
 				y: number;
 			}>
-		: ColTypeIsNullOrUndefinedWithDefault<TColumn, string>
+		: ColTypeIsNullOrUndefinedWithDefault<TColumn, any>
 	: TColumn['dataType'] extends 'date' | 'string' | 'bigint'
 		? TColumn['enumValues'] extends [string, ...string[]]
 			? ColTypeIsNullOrUndefinedWithDefault<TColumn, TColumn['enumValues'][number]>
@@ -118,14 +118,14 @@ export type GetColumnGqlInsertDataType<TColumn extends Column> = TColumn['dataTy
 
 export type GetColumnGqlUpdateDataType<TColumn extends Column> = TColumn['dataType'] extends 'boolean'
 	? boolean | null | undefined
-	: TColumn['dataType'] extends 'json' ? TColumn['_']['columnType'] extends 'PgGeometryObject' ? 
+	: TColumn['dataType'] extends 'json' ? TColumn['_']['columnType'] extends 'PgGeometryObject' ?
 				| {
 					x: number;
 					y: number;
 				}
 				| null
 				| undefined
-		: string | null | undefined
+		: any | null | undefined
 	: TColumn['dataType'] extends 'date' | 'string' | 'bigint'
 		? TColumn['enumValues'] extends [string, ...string[]] ? TColumn['enumValues'][number] | null | undefined
 		: string | null | undefined
@@ -133,7 +133,7 @@ export type GetColumnGqlUpdateDataType<TColumn extends Column> = TColumn['dataTy
 	: TColumn['dataType'] extends 'buffer' ? number[] | null | undefined
 	: TColumn['dataType'] extends 'array' ? TColumn['columnType'] extends 'PgVector' ? number[] | null | undefined
 		: TColumn['columnType'] extends 'PgGeometry' ? [number, number] | null | undefined
-		: 
+		:
 			| Array<
 				GetColumnGqlDataType<TColumn extends { baseColumn: Column } ? TColumn['baseColumn'] : never> extends
 					infer InnerColType ? InnerColType extends null | undefined ? never

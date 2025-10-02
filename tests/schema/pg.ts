@@ -5,6 +5,8 @@ import {
 	date,
 	geometry,
 	integer,
+	json,
+	jsonb,
 	pgEnum,
 	pgTable,
 	serial,
@@ -37,6 +39,8 @@ export const Users = pgTable('users', {
 	geoTuple: geometry('geometry_tuple', {
 		mode: 'tuple',
 	}),
+	metadata: json('metadata'),
+	preferences: jsonb('preferences'),
 });
 
 export const Customers = pgTable('customers', {

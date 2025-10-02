@@ -42,6 +42,9 @@ export const remapToGraphQLCore = (
 		}
 		if (column.columnType === 'PgGeometryObject') return value;
 
+		// For JSON columns, return the value as-is (Drizzle already parsed it)
+		if (column.dataType === 'json') return value;
+
 		return JSON.stringify(value);
 	}
 
@@ -98,13 +101,9 @@ export const remapFromGraphQLCore = (value: any, column: Column, columnName: str
 		case 'json': {
 			if (column.columnType === 'PgGeometryObject') return value;
 
-			try {
-				return JSON.parse(value);
-			} catch (e) {
-				throw new GraphQLError(
-					`Invalid JSON in field '${columnName}':\n${e instanceof Error ? e.message : 'Unknown error'}`,
-				);
-			}
+			// For JSON columns, accept the value as-is (any type: object, array, string, number, boolean)
+			// GraphQL JSON scalar will handle the validation
+			return value;
 		}
 
 		case 'array': {
