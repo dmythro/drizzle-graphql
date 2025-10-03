@@ -31,15 +31,33 @@ import type { ConvertedColumn } from './types';
 const allowedNameChars = /^[a-zA-Z0-9_]+$/;
 
 const enumMap = new WeakMap<Object, GraphQLEnumType>();
-const generateEnumCached = (column: Column, columnName: string, tableName: string): GraphQLEnumType => {
+const generateEnumCached = (
+	column: Column,
+	columnName: string,
+	tableName: string,
+): GraphQLEnumType => {
 	if (enumMap.has(column)) return enumMap.get(column)!;
 
 	const gqlEnum = new GraphQLEnumType({
 		name: `${capitalize(tableName)}${capitalize(columnName)}Enum`,
-		values: Object.fromEntries(column.enumValues!.map((e, index) => [allowedNameChars.test(e) ? e : `Option${index}`, {
-			value: e,
-			description: `Value: ${e}`,
-		}])),
+		values: Object.fromEntries(
+			column.enumValues!.map((e, index) => {
+				// Replace hyphens with underscores for GraphQL compatibility
+				const enumName = e.replace(/-/g, '_');
+				// Fall back to Option{index} only if still invalid after replacement
+				const finalName = allowedNameChars.test(enumName)
+					? enumName
+					: `Option${index}`;
+
+				return [
+					finalName,
+					{
+						value: e,
+						description: `Value: ${e}`,
+					},
+				];
+			}),
+		),
 	});
 
 	enumMap.set(column, gqlEnum);
@@ -82,7 +100,9 @@ const columnToGraphQLCore = (
 		case 'date':
 			return { type: GraphQLString, description: 'Date' };
 		case 'string':
-			if (column.enumValues?.length) return { type: generateEnumCached(column, columnName, tableName) };
+			if (column.enumValues?.length) {
+				return { type: generateEnumCached(column, columnName, tableName) };
+			}
 
 			return { type: GraphQLString, description: 'String' };
 		case 'bigint':
@@ -102,7 +122,10 @@ const columnToGraphQLCore = (
 				? { type: GraphQLInt, description: 'Integer' }
 				: { type: GraphQLFloat, description: 'Float' };
 		case 'buffer':
-			return { type: new GraphQLList(new GraphQLNonNull(GraphQLInt)), description: 'Buffer' };
+			return {
+				type: new GraphQLList(new GraphQLNonNull(GraphQLInt)),
+				description: 'Buffer',
+			};
 		case 'array': {
 			if (column.columnType === 'PgVector') {
 				return {
@@ -126,17 +149,24 @@ const columnToGraphQLCore = (
 			);
 
 			return {
-				type: new GraphQLList(new GraphQLNonNull(innerType.type as GraphQLScalarType)),
+				type: new GraphQLList(
+					new GraphQLNonNull(innerType.type as GraphQLScalarType),
+				),
 				description: `Array<${innerType.description}>`,
 			};
 		}
 		case 'custom':
 		default:
-			throw new Error(`Drizzle-GraphQL Error: Type ${column.dataType} is not implemented!`);
+			throw new Error(
+				`Drizzle-GraphQL Error: Type ${column.dataType} is not implemented!`,
+			);
 	}
 };
 
-export const drizzleColumnToGraphQLType = <TColumn extends Column, TIsInput extends boolean>(
+export const drizzleColumnToGraphQLType = <
+	TColumn extends Column,
+	TIsInput extends boolean,
+>(
 	column: TColumn,
 	columnName: string,
 	tableName: string,
@@ -149,7 +179,10 @@ export const drizzleColumnToGraphQLType = <TColumn extends Column, TIsInput exte
 	if (noDesc.find((e) => e === column.dataType)) delete typeDesc.description;
 
 	if (forceNullable) return typeDesc as ConvertedColumn<TIsInput>;
-	if (column.notNull && !(defaultIsNullable && (column.hasDefault || column.defaultFn))) {
+	if (
+		column.notNull
+		&& !(defaultIsNullable && (column.hasDefault || column.defaultFn))
+	) {
 		return {
 			type: new GraphQLNonNull(typeDesc.type),
 			description: typeDesc.description,
