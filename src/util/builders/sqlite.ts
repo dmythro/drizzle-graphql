@@ -10,12 +10,12 @@ import {
 } from 'graphql';
 
 import {
+	executeCountQuery,
 	extractFilters,
 	extractOrderBy,
 	extractRelationsParams,
 	extractSelectedColumnsFromTree,
 	extractSelectedColumnsFromTreeSQLFormat,
-	executeCountQuery,
 	generateTableTypes,
 } from '@/util/builders/common';
 import { capitalize, uncapitalize } from '@/util/case-ops';

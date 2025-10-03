@@ -90,6 +90,6 @@ export const postsRelations = relations(Posts, ({ one, many }) => ({
 		references: [Posts.id],
 	}),
 	replies: many(Posts, {
-		relationName: 'post_replies'
+		relationName: 'post_replies',
 	}),
 }));
