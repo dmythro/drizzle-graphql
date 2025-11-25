@@ -14,6 +14,8 @@ import { generateMySQL, generatePG, generateSQLite } from '@/util/builders';
 import { ObjMap } from 'graphql/jsutils/ObjMap';
 import type { AnyDrizzleDB, BuildSchemaConfig, GeneratedData } from './types';
 
+export { GraphQLJSON } from '@/util/graphql-scalars/json';
+
 export const buildSchema = <TDbClient extends AnyDrizzleDB<any>>(
 	db: TDbClient,
 	config?: BuildSchemaConfig,
